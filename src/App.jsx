@@ -22,6 +22,7 @@ const App = () => {
       (loc) => loc.location_no === table.location_no
     );
     return {
+      table_id : table._id,
       table_no: table.table_no,
       location_name: location ? location.location_name : "Unknown Location",
     };
@@ -29,51 +30,38 @@ const App = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        await axios.get(`${server}api/v1/products`).then((response) => {
-            setProducts(response.data);
-            setFilteredProducts(response.data);
-          }).catch((error) =>
-            console.error("Error fetching products:", error.message)
-          );
+        try {
+            const [locationsResponse, tablesResponse, productsResponse, categoriesResponse, cartItemsResponse] = await Promise.all([
+                axios.get(`${server}api/v1/locations`),
+                axios.get(`${server}api/v1/tables`),
+                axios.get(`${server}api/v1/products`),
+                axios.get(`${server}api/v1/categories`),
+                axios.post(`${server}api/v1/cartitem`, {
+                    tableNo: selectedTable.table_no,
+                    locationName: selectedTable.location_name,
+                })
+            ]);
 
-        await axios.get(`${server}api/v1/locations`).then((response) => setLocations(response.data))
-          .catch((error) =>
-            console.error("Error fetching locations:", error.message)
-          );
+            setLocations(locationsResponse.data);
+            setTables(tablesResponse.data);
+            setProducts(productsResponse.data);
+            setFilteredProducts(productsResponse.data);
 
-        await axios
-          .get(`${server}api/v1/tables`)
-          .then((response) => setTables(response.data))
-          .catch((error) =>
-            console.error("Error fetching tables:", error.message)
-          );
+            const categories = categoriesResponse.data;
+            const categoryWithProducts = categories.filter(category => {
+                return productsResponse.data.some(product => product.category_no === category.category_no);
+            });
+            setCategories(categoryWithProducts);
 
-        await axios
-          .get(`${server}api/v1/categories`)
-          .then((response) => setCategories(response.data))
-          .catch((error) =>
-            console.error("Error fetching categories:", error.message)
-          );
-
-        console.log(categories);
-
-        await axios
-          .post(`${server}api/v1/cartitem`, {
-            tableNo: selectedTable.table_no,
-            locationName: selectedTable.location_name,
-          })
-          .then((response) => setCartItems(response.data))
-          .catch((error) =>
-            console.error("Error fetching cart items:", error.message)
-          );
-      } catch (error) {
-        console.error("Error fetching data:", error.message);
-      }
+            setCartItems(cartItemsResponse.data);
+        } catch (error) {
+            console.error("Error fetching data:", error.message);
+        }
     };
 
     fetchData();
-  }, []);
+}, [selectedTable]); // Include selectedTable in the dependency array if you want to fetch cart items when it changes
+
 
   const handleTableChange = async (e) => {
     const newTableNo = e.target.value.split(" ")[0];
@@ -96,12 +84,13 @@ const App = () => {
   };
 
   const handleProductChange = (e) => {
-    const filterProducts = products.filter(
+    const searchedProducts = products.filter(
       (product) =>
-        product.name.toLowerCase().includes(e.target.value.toLowerCase()) ||
+        product.item_name.toLowerCase().includes(e.target.value.toLowerCase()) ||
         product.item_no.toString() === e.target.value
     );
-    setProducts(filterProducts);
+    console.log(searchedProducts);
+    setFilteredProducts(searchedProducts);
   };
 
   const handleInputTableChange = debounce(async (e) => {
@@ -196,10 +185,12 @@ const App = () => {
     <>
       <Header />
       <main className="flex w-4/5 h-full pt-16 fixed max-md:w-full">
+        
         <section className="w-full flex flex-col gap-0 pt-1">
           <div className="flex max-h-[28vh] w-full pt-2 px-2 pr-4 gap-2 max-md:flex-col">
+
             <div
-              className="flex flex-col gap-1 max-w-[60%] overflow-y-scroll max-md:max-w-full"
+              className="flex flex-col gap-1 max-w-[100%] overflow-y-scroll max-md:max-w-full"
               style={{ maxHeight: "22vh" }}
             >
               <div className="flex px-3 py-1 gap-2">
@@ -217,44 +208,50 @@ const App = () => {
                   onChange={handleProductChange}
                 />
               </div>
+
               <div
                 id="CategoryList"
                 className="rounded-md flex gap-3 px-2 max-md:px-2 max-md:gap-1 py-1 max-md:py-0 max-w-full max-h-full flex-wrap overflow-y-scroll max-md:max-h-16 max-md:overflow-y-hidden max-md:overflow-x-scroll max-md:flex-nowrap"
               >
+                <button
+                onClick={()=> setFilteredProducts(products)}
+                className="w-max px-6 py-2 text-center bg-text-primary text-white rounded-md flex gap-2 items-center hover:border-none hover:bg-secondary"  
+                >All</button>
                 {categories.map((category) => (
                   <button
                     onClick={() => handleCategoryChange(category.category_no)}
                     key={category.category_name}
-                    className="w-max px-5 py-3 text-center bg-text-primary text-white rounded-md flex gap-2 items-center hover:border-none hover:bg-secondary"
+                    className="w-max px-6 py-2 text-center bg-text-primary text-white rounded-md flex gap-2 items-center hover:border-none hover:bg-secondary text-sm"
                   >
                     {category.category_name.split(" ")[0]}
                   </button>
                 ))}
               </div>
             </div>
+
             <div
-              className="rounded-md flex pt-2 pl-2 flex-wrap gap-1 overflow-y-scroll bg-light-primary max-md:hidden"
-              style={{ maxHeight: "22vh" }}
-            >
+              className="rounded-md flex pt-2 pl-3 flex-wrap gap-2 overflow-y-scroll bg-light-primary max-md:hidden"
+              style={{ maxHeight: "22vh" }}>
               {tableData.map((table) => (
                 <button
-                  key={table.table_no}
+                  key={table.table_id}
                   value={`${table.table_no} ${table.location_name}`}
                   onClick={handleTableChange}
-                  className="text-white rounded-lg h-[3rem] w-[4.9rem] bg-secondary hover:bg-text-primary"
+                  className="text-white rounded-lg w-[5.4rem] px-6 py-3 bg-secondary hover:bg-text-primary"
                 >
                   {table.table_no}
                 </button>
               ))}
             </div>
+
           </div>
 
-          <div className="pb-2 pl-2 max-h-[70vh] max-md:max-h-[79vh]">
+          <div className="pb-2 pl-2 max-h-[70vh] max-md:max-h-[79vh] max-md:pb-14">
             <div className="productList w-full bg-primary py-3 px-2 max-md:py-0 flex flex-wrap gap-1 max-h-full overflow-y-scroll rounded-md">
               {filteredProducts.map((item) => (
                 <div
                   onClick={() => handleAddToCart(item)}
-                  key={item.item_no}
+                  key={item._id}
                   className="flex p-1 bg-light-primary rounded-md w-[16.3%] hover:cursor-pointer max-md:flex-col max-md:w-[48%] max-md:gap-2"
                 >
                   <img
@@ -275,7 +272,7 @@ const App = () => {
             </div>
           </div>
 
-          <div className="hidden fixed  bottom-0 w-full max-md:flex gap-2 px-4 py-1">
+          <div className="hidden fixed  bottom-0 w-full max-md:flex gap-2 px-3 py-0">
             <button className="w-full rounded-lg bg-text-primary text-xl font-bold text-white px-3 py-2">
               Print
             </button>
@@ -284,6 +281,7 @@ const App = () => {
             </button>
           </div>
         </section>
+
         <aside className="max-md:hidden bg-secondary w-1/5 h-full fixed right-0 flex flex-col px-3 pt-2 ">
           <h2 className="text-white text-center text-xl mb-4">
             {selectedTable.table_no + " " + selectedTable.location_name}
@@ -298,7 +296,7 @@ const App = () => {
             >
               {tableData.map((table) => (
                 <option
-                  key={table.table_no}
+                  key={table.table_id}
                   value={`${table.table_no} ${table.location_name}`}
                 >
                   {table.table_no} - {table.location_name}
@@ -316,7 +314,7 @@ const App = () => {
           <div className="my-3 cartItems max-h-72 flex flex-col gap-3 overflow-y-scroll bg-light-primary p-2 rounded-md">
             {cartItems.map((item) => (
               <div
-                key={item.item_no}
+                key={item._id}
                 className={`flex ${
                   item.is_printed ? "bg-text-primary" : "bg-secondary"
                 } p-2 rounded-md`}
