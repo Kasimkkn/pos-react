@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaHome, FaHistory, FaBell } from "react-icons/fa";
 import { BiSolidFoodMenu } from "react-icons/bi";
 import { MdMenu } from 'react-icons/md';
 
-const Header = ({ toggleSidebar, isSidebarOpen }) => {
+const Header = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
   return (
     <nav className={`bg-secondary  z-50  fixed ${isSidebarOpen ? 'w-56 transition-all duration-300 h-full'  : 'px-8 w-full flex justify-between'}`}>
       <div className={`flex justify-between max-md:w-[50%] ${isSidebarOpen ? 'max-md:w-[100%]' : ''}`}>
