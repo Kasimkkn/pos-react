@@ -3,7 +3,7 @@ import Header from "./components/Header";
 import defaultImage from "./assets/food.svg";
 import axios from "axios";
 
-const server = "http://localhost:3000/";
+const server = "https://pos-api-nd0e.onrender.com/";
 
 const App = () => {
   const [tables, setTables] = useState([]);
