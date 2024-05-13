@@ -201,9 +201,17 @@ const App = () => {
     setFilteredProducts(filterProducts);
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const toggleCart = () => {
+    setIsCartOpen(!isCartOpen);
+  };
   return (
     <>
-      <Header />
+      <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} toggleCart={toggleCart}/>
       <main className="flex w-4/5 h-full pt-16 fixed max-md:w-full">
         <section className="w-full flex flex-col gap-0 pt-1">
           <div className="flex max-h-[28vh] w-full pt-2 px-2 pr-4 gap-2 max-md:flex-col">
@@ -254,6 +262,7 @@ const App = () => {
           selectedTable={selectedTable}
           handleAddToCart={handleAddToCart}
           handleDecrementFromCart={handleDecrementFromCart}
+          isCartOpen={isCartOpen}
         />
       </main>
       <Toaster position="top-center" />

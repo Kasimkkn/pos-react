@@ -1,7 +1,6 @@
 import React from 'react';
 
 const TableSelector = ({ tableData, handleTableChange, cartItems }) => {
-  console.log(cartItems);
   return (
     <div className="rounded-md flex pt-2 w-full pl-3 flex-wrap gap-2 overflow-y-scroll bg-light-primary max-md:hidden">
       {tableData.map((table) => {

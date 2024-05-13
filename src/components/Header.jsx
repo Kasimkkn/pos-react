@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { FaHome, FaHistory, FaBell } from "react-icons/fa";
 import { BiSolidFoodMenu } from "react-icons/bi";
 import { MdMenu } from 'react-icons/md';
+import { FaCartShopping } from "react-icons/fa6";
 
-const Header = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+
+const Header = ({isSidebarOpen , toggleSidebar , toggleCart}) => {
+  
   return (
-    <nav className={`bg-secondary  z-50  fixed ${isSidebarOpen ? 'w-56 transition-all duration-300 h-full'  : 'px-8 w-full flex justify-between'}`}>
+    <nav className={`bg-secondary  z-50  fixed ${isSidebarOpen ? 'w-56 h-full'  : 'px-8 w-full flex justify-between'}`}>
       <div className={`flex justify-between max-md:w-[50%] ${isSidebarOpen ? 'max-md:w-[100%]' : ''}`}>
       <button className="md:hidden text-white p-4 focus:outline-none" onClick={toggleSidebar}>
-        <MdMenu className='text-3xl'/>
+        <MdMenu className='text-3xl hover:text-text-primary hover:cursor-pointer'/>
       </button>  
       <div className='logo text-text-primary text-xl p-5 flex items-center max-md:text-xl'>
         M<span className='text-white'>a</span>M
@@ -44,6 +43,9 @@ const Header = () => {
           <img src="https://media.licdn.com/dms/image/D4D03AQG0YsFctCrMZQ/profile-displayphoto-shrink_800_800/0/1711246000788?e=1720656000&v=beta&t=tQnguUzqoyRoJ6B0dXGu04OF8aPaln0XZEwxz2HL0uY" alt="kasim" className='w-full h-full rounded-full' />
         </div>
       </div>
+      <button className="md:hidden text-white p-4 focus:outline-none" onClick={toggleCart}>
+        <FaCartShopping className='text-3xl hover:text-text-primary hover:cursor-pointer'/>
+      </button>  
     </nav>
   );
 };

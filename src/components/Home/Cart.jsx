@@ -3,7 +3,7 @@ import { AiOutlinePlusCircle } from "react-icons/ai";
 import { FiMinusCircle } from "react-icons/fi";
 
 
-const Cart = ({cartItems , handleTableChange, tableData, selectedTable , handleAddToCart , handleDecrementFromCart,defaultImage}) => {
+const Cart = ({cartItems , handleTableChange, tableData, selectedTable , handleAddToCart , handleDecrementFromCart,defaultImage , isCartOpen}) => {
 
   const [subTotal, setSubTotal] = useState(0)
   const [total, setTotal] = useState(subTotal + (0.05 * subTotal))
@@ -20,7 +20,7 @@ const Cart = ({cartItems , handleTableChange, tableData, selectedTable , handleA
   })
 
   return (
-    <aside className="max-md:hidden bg-secondary w-1/5 h-full fixed right-0 flex flex-col px-3 pt-2 ">
+    <aside className={`bg-secondary w-1/5 h-full fixed right-0 flex flex-col px-3 pt-2 ${isCartOpen? "z-50 w-9/12" : "max-md:hidden"} `}>
           <h2 className="text-white text-center text-xl mb-4">
             {selectedTable.table_no + " " + selectedTable.location_name}
           </h2>
