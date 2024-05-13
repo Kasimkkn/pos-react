@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react'
+import { AiOutlinePlusCircle } from "react-icons/ai";
+import { FiMinusCircle } from "react-icons/fi";
+
 
 const Cart = ({cartItems , handleTableChange, tableData, selectedTable , handleAddToCart , handleDecrementFromCart,defaultImage}) => {
 
@@ -22,34 +25,26 @@ const Cart = ({cartItems , handleTableChange, tableData, selectedTable , handleA
             {selectedTable.table_no + " " + selectedTable.location_name}
           </h2>
           <div className="flex flex-col gap-3">
-            <select
-              name="table"
-              id="table"
+            <select name="table" id="table"
               className="bg-light-primary p-2 rounded-md border-none text-white font-extralight hover:cursor-pointer focus:outline-none"
-              value={selectedTable.table_no}
-              onChange={handleTableChange}
+             value={selectedTable.table_no} onChange={handleTableChange}
             >
               {tableData.map((table) => (
                 <option
-                  key={table.table_id}
-                  value={`${table.table_no} ${table.location_name}`}
-                >
+                  key={table.table_id} value={`${table.table_no} ${table.location_name}`} >
                   {table.table_no} - {table.location_name}
                 </option>
               ))}
             </select>
 
-            <input
-              type="text"
-              placeholder="Customer Name"
+            <input type="text" placeholder="Customer Name"
               className="bg-light-primary p-2 rounded-md border-none focus:outline-none "
             />
           </div>
 
           <div className="my-3 cartItems max-h-80 flex flex-col gap-3 overflow-y-scroll bg-light-primary p-2 rounded-md">
             {cartItems.map((item) => (
-              <div key={item._id} className={`flex justify-between ${item.is_printed ? "bg-text-primary" : "bg-secondary"} p-2 rounded-md`}
-              >
+              <div key={item._id} className={`flex justify-between hover:cursor-pointer ${item.is_printed ? "bg-text-primary" : "bg-secondary"} p-2 rounded-md`} >
                 <img src={defaultImage} alt={item.item_name} className="w-16 h-16 rounded-md"
                 />
                 <div className="flex justify-center h-full flex-col gap-2 px-3">
@@ -59,18 +54,17 @@ const Cart = ({cartItems , handleTableChange, tableData, selectedTable , handleA
                   <span className="text-white text-xs">
                     {item.quantity} * {item.price}
                   </span>
-                  {/* <span className="text-white text-xs">$</span> */}
                 </div>
                 <div className="flex gap-2 items-center">
                   <button
                     onClick={() => handleAddToCart(item)}
                     className="flex items-center justify-center w-8 h-8 rounded-lg bg-text-primary text-xl font-bold text-white">
-                    +
+                    <AiOutlinePlusCircle/>
                   </button>
                   <button
                     onClick={() => handleDecrementFromCart(item)}
                     className="flex items-center justify-center w-8 h-8 rounded-lg bg-text-primary text-xl font-bold text-white">
-                    -
+                    <FiMinusCircle/>
                   </button>
                 </div>
               </div>
