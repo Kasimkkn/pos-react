@@ -265,7 +265,9 @@ const App = () => {
             tableNo: selectedTable.table_no,
             locationName: selectedTable.location_name,
           })
+          const allCartItems = await axios.get(`${server}api/v1/allcartitems`);
           setCartItems(cartItems.data);
+          setAllCartItems(allCartItems.data);
         }
     } catch (error) {
       console.error("Error generating Bill:", error.message);
