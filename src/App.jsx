@@ -2,14 +2,22 @@ import React, { useEffect, useState } from "react";
 import Header from "./components/Header";
 import defaultImage from "./assets/food.svg";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
+import TableSelector from "./components/Home/TableSelector";
+import ProductList from "./components/Home/ProductList";
+import Cart from "./components/Home/Cart";
+import CategoryList from "./components/Home/CategoryList";
+import InputBoxes from "./components/Home/InputBoxes.jsx";
 
-const server = "https://pos-api-nd0e.onrender.com/";
+const server = "http://localhost:3000/";
 
 const App = () => {
   const [tables, setTables] = useState([]);
   const [locations, setLocations] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [allCartItems , setAllCartItems] = useState([]);
   const [selectedTable, setSelectedTable] = useState({
     table_no: 1,
     location_name: "Common-Hall",
@@ -22,7 +30,7 @@ const App = () => {
       (loc) => loc.location_no === table.location_no
     );
     return {
-      table_id : table._id,
+      table_id: table._id,
       table_no: table.table_no,
       location_name: location ? location.location_name : "Unknown Location",
     };
@@ -30,38 +38,47 @@ const App = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-        try {
-            const [locationsResponse, tablesResponse, productsResponse, categoriesResponse, cartItemsResponse] = await Promise.all([
-                axios.get(`${server}api/v1/locations`),
-                axios.get(`${server}api/v1/tables`),
-                axios.get(`${server}api/v1/products`),
-                axios.get(`${server}api/v1/categories`),
-                axios.post(`${server}api/v1/cartitem`, {
-                    tableNo: selectedTable.table_no,
-                    locationName: selectedTable.location_name,
-                })
-            ]);
+      try {
+        const [
+          locationsResponse,
+          tablesResponse,
+          productsResponse,
+          categoriesResponse,
+          allCartItemsResponse,
+          cartItemsResponse,
+        ] = await Promise.all([
+          axios.get(`${server}api/v1/locations`),
+          axios.get(`${server}api/v1/tables`),
+          axios.get(`${server}api/v1/products`),
+          axios.get(`${server}api/v1/categories`),
+          axios.get(`${server}api/v1/allcartitems`),
+          axios.post(`${server}api/v1/cartitem`, {
+            tableNo: selectedTable.table_no,
+            locationName: selectedTable.location_name,
+          }),
+        ]);
 
-            setLocations(locationsResponse.data);
-            setTables(tablesResponse.data);
-            setProducts(productsResponse.data);
-            setFilteredProducts(productsResponse.data);
+        setLocations(locationsResponse.data);
+        setTables(tablesResponse.data);
+        setProducts(productsResponse.data);
+        setFilteredProducts(productsResponse.data);
 
-            const categories = categoriesResponse.data;
-            const categoryWithProducts = categories.filter(category => {
-                return productsResponse.data.some(product => product.category_no === category.category_no);
-            });
-            setCategories(categoryWithProducts);
-
-            setCartItems(cartItemsResponse.data);
-        } catch (error) {
-            console.error("Error fetching data:", error.message);
-        }
+        const categories = categoriesResponse.data;
+        const categoryWithProducts = categories.filter((category) => {
+          return productsResponse.data.some(
+            (product) => product.category_no === category.category_no
+          );
+        });
+        setCategories(categoryWithProducts);
+        setAllCartItems(allCartItemsResponse.data);
+        setCartItems(cartItemsResponse.data);
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
     };
 
     fetchData();
-}, [selectedTable]); // Include selectedTable in the dependency array if you want to fetch cart items when it changes
-
+  }, [selectedTable]);
 
   const handleTableChange = async (e) => {
     const newTableNo = e.target.value.split(" ")[0];
@@ -86,7 +103,9 @@ const App = () => {
   const handleProductChange = (e) => {
     const searchedProducts = products.filter(
       (product) =>
-        product.item_name.toLowerCase().includes(e.target.value.toLowerCase()) ||
+        product.item_name
+          .toLowerCase()
+          .includes(e.target.value.toLowerCase()) ||
         product.item_no.toString() === e.target.value
     );
     console.log(searchedProducts);
@@ -146,6 +165,7 @@ const App = () => {
       });
       if (response.data.success) {
         setCartItems(response.data.updatedCartItems);
+        toast.success("Item added to cart");
       } else {
         console.error("Failed to add item to cart:", response.data.message);
       }
@@ -163,11 +183,11 @@ const App = () => {
       });
       if (response.data.success) {
         setCartItems(response.data.updatedCartItems);
+        toast.error("Item removed from cart");
+
       } else {
-        console.error(
-          "Failed to decrement item quantity:",
-          response.data.message
-        );
+        console.error("Failed to decrement item quantity:", response.data.message);
+
       }
     } catch (error) {
       console.error("Error decrementing item quantity:", error.message);
@@ -185,92 +205,36 @@ const App = () => {
     <>
       <Header />
       <main className="flex w-4/5 h-full pt-16 fixed max-md:w-full">
-        
         <section className="w-full flex flex-col gap-0 pt-1">
           <div className="flex max-h-[28vh] w-full pt-2 px-2 pr-4 gap-2 max-md:flex-col">
 
-            <div
-              className="flex flex-col gap-1 max-w-[100%] overflow-y-scroll max-md:max-w-full"
-              style={{ maxHeight: "22vh" }}
-            >
-              <div className="flex px-3 py-1 gap-2">
-                <input
-                  type="text"
-                  placeholder="Enter Table No"
-                  className="bg-primary w-full p-2 border border-1 border-light-white rounded-md text-white font-extralight focus:outline-none"
-                  onChange={handleInputTableChange}
-                  autoFocus
-                />
-                <input
-                  type="text"
-                  placeholder="Search Dishes..."
-                  className="bg-primary w-full p-2 border border-1 border-light-white rounded-md text-white font-extralight focus:outline-none"
-                  onChange={handleProductChange}
-                />
-              </div>
+            <div className="flex w-full flex-col gap-1 overflow-y-scroll max-md:max-w-full">
 
-              <div
-                id="CategoryList"
-                className="rounded-md flex gap-3 px-2 max-md:px-2 max-md:gap-1 py-1 max-md:py-0 max-w-full max-h-full flex-wrap overflow-y-scroll max-md:max-h-16 max-md:overflow-y-hidden max-md:overflow-x-scroll max-md:flex-nowrap"
-              >
-                <button
-                onClick={()=> setFilteredProducts(products)}
-                className="w-max px-6 py-2 text-center bg-text-primary text-white rounded-md flex gap-2 items-center hover:border-none hover:bg-secondary"  
-                >All</button>
-                {categories.map((category) => (
-                  <button
-                    onClick={() => handleCategoryChange(category.category_no)}
-                    key={category.category_name}
-                    className="w-max px-6 py-2 text-center bg-text-primary text-white rounded-md flex gap-2 items-center hover:border-none hover:bg-secondary text-sm"
-                  >
-                    {category.category_name.split(" ")[0]}
-                  </button>
-                ))}
-              </div>
+              <InputBoxes
+                handleInputTableChange={handleInputTableChange}
+                handleProductChange={handleProductChange}
+              />
+
+              <CategoryList
+                products={products}
+                categories={categories}
+                handleCategoryChange={handleCategoryChange}
+                setFilteredProducts={setFilteredProducts}
+              />
             </div>
 
-            <div
-              className="rounded-md flex pt-2 pl-3 flex-wrap gap-2 overflow-y-scroll bg-light-primary max-md:hidden"
-              style={{ maxHeight: "22vh" }}>
-              {tableData.map((table) => (
-                <button
-                  key={table.table_id}
-                  value={`${table.table_no} ${table.location_name}`}
-                  onClick={handleTableChange}
-                  className="text-white rounded-lg w-[5.4rem] px-6 py-3 bg-secondary hover:bg-text-primary"
-                >
-                  {table.table_no}
-                </button>
-              ))}
-            </div>
-
+            <TableSelector
+              tableData={tableData}
+              handleTableChange={handleTableChange}
+              cartItems={allCartItems}
+            />
           </div>
 
-          <div className="pb-2 pl-2 max-h-[70vh] max-md:max-h-[79vh] max-md:pb-14">
-            <div className="productList w-full bg-primary py-3 px-2 max-md:py-0 flex flex-wrap gap-1 max-h-full overflow-y-scroll rounded-md">
-              {filteredProducts.map((item) => (
-                <div
-                  onClick={() => handleAddToCart(item)}
-                  key={item._id}
-                  className="flex p-1 bg-light-primary rounded-md w-[16.3%] hover:cursor-pointer max-md:flex-col max-md:w-[48%] max-md:gap-2"
-                >
-                  <img
-                    src={defaultImage}
-                    alt={item.item_name}
-                    className="w-16 h-16 rounded-md max-md:w-full max-md:h-24"
-                  />
-                  <div className="flex flex-col gap-2 px-2 justify-center">
-                    <p className="text-white text-xs uppercase font-semibold max-md:text-lg">
-                      {item.item_name.split(" ").slice(0, 2).join(" ")}
-                    </p>
-                    <span className="text-text-primary text-xs max-md:text-sm">
-                      Price: ${item.common_hall}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <ProductList
+            filteredProducts={filteredProducts}
+            defaultImage={defaultImage}
+            handleAddToCart={handleAddToCart}
+          />
 
           <div className="hidden fixed  bottom-0 w-full max-md:flex gap-2 px-3 py-0">
             <button className="w-full rounded-lg bg-text-primary text-xl font-bold text-white px-3 py-2">
@@ -282,105 +246,17 @@ const App = () => {
           </div>
         </section>
 
-        <aside className="max-md:hidden bg-secondary w-1/5 h-full fixed right-0 flex flex-col px-3 pt-2 ">
-          <h2 className="text-white text-center text-xl mb-4">
-            {selectedTable.table_no + " " + selectedTable.location_name}
-          </h2>
-          <div className="flex flex-col gap-3">
-            <select
-              name="table"
-              id="table"
-              className="bg-light-primary p-2 rounded-md border-none text-white font-extralight hover:cursor-pointer focus:outline-none"
-              value={selectedTable.table_no}
-              onChange={handleTableChange}
-            >
-              {tableData.map((table) => (
-                <option
-                  key={table.table_id}
-                  value={`${table.table_no} ${table.location_name}`}
-                >
-                  {table.table_no} - {table.location_name}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="text"
-              placeholder="Customer Name"
-              className="bg-light-primary p-2 rounded-md border-none focus:outline-none "
-            />
-          </div>
-
-          <div className="my-3 cartItems max-h-72 flex flex-col gap-3 overflow-y-scroll bg-light-primary p-2 rounded-md">
-            {cartItems.map((item) => (
-              <div
-                key={item._id}
-                className={`flex ${
-                  item.is_printed ? "bg-text-primary" : "bg-secondary"
-                } p-2 rounded-md`}
-              >
-                <img
-                  src={defaultImage}
-                  alt={item.item_name}
-                  className="w-16 h-16 rounded-md"
-                />
-                <div className="flex flex-col gap-2 px-3">
-                  <p className="text-white text-xs uppercase font-semibold">
-                    {item.item_name.split(" ").slice(0, 2).join(" ")}
-                  </p>
-                  <span className="text-white text-xs">
-                    Quantity: {item.quantity}
-                  </span>
-                  <span className="text-white text-xs">${item.price}</span>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <button
-                    onClick={() => handleAddToCart(item)}
-                    className="flex items-center justify-center w-8 h-8 rounded-lg bg-text-primary text-xl font-bold text-white"
-                  >
-                    +
-                  </button>
-                  <button
-                    onClick={() => handleDecrementFromCart(item)}
-                    className="flex items-center justify-center w-8 h-8 rounded-lg bg-text-primary text-xl font-bold text-white"
-                  >
-                    -
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-light-primary p-2 rounded-md ">
-            <div className="flex justify-between px-1 text-white">
-              <p>subtotal</p>
-              <span>$20.0</span>
-            </div>
-            <div className="flex justify-between px-1 text-white">
-              <p>Tax</p>
-              <span>$20.0</span>
-            </div>
-            <div className="flex justify-between px-1 text-white">
-              <p>Discount</p>
-              <span>$00.0</span>
-            </div>
-          </div>
-          <div className="bg-light-primary rounded-xl my-2 border-t-2 border-text-primary border-dashed p-2">
-            <div className="flex justify-between px-1 text-white">
-              <p>total</p>
-              <span>$20.0</span>
-            </div>
-          </div>
-          <div className="flex gap-2 mt-3">
-            <button className="w-full rounded-lg bg-text-primary text-xl font-bold text-white px-3 py-1">
-              Print
-            </button>
-            <button className="w-full rounded-lg bg-text-primary text-xl font-bold text-white px-3 py-1">
-              KOT
-            </button>
-          </div>
-        </aside>
+        <Cart
+          cartItems={cartItems}
+          defaultImage={defaultImage}
+          handleTableChange={handleTableChange}
+          tableData={tableData}
+          selectedTable={selectedTable}
+          handleAddToCart={handleAddToCart}
+          handleDecrementFromCart={handleDecrementFromCart}
+        />
       </main>
+      <Toaster position="top-center" />
     </>
   );
 };
