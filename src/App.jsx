@@ -10,7 +10,7 @@ import Cart from "./components/Home/Cart";
 import CategoryList from "./components/Home/CategoryList";
 import InputBoxes from "./components/Home/InputBoxes.jsx";
 
-const server = import.meta.env.BACKEND_URL || "http://localhost:3000/";
+const server = import.meta.env.BACKEND_URL || "https://pos-api-nd0e.onrender.com/";
 
 const App = () => {
   const [tables, setTables] = useState([]);
