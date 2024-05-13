@@ -38,7 +38,6 @@ const Header = ({isSidebarOpen , toggleSidebar , toggleCart}) => {
         </li>
       </ul>
       <div className={`Icon flex gap-5 items-center ${isSidebarOpen ? 'max-md:justify-center max-md:h-[80%]' : 'max:md:hidden'}`}>
-        <FaBell className={`text-2xl text-white ${isSidebarOpen ? '' : 'max-md:hidden'}`}/>
         <div className={`w-10 h-10 ${isSidebarOpen ? '' : 'max-md:hidden'}`}>
           <img src="https://media.licdn.com/dms/image/D4D03AQG0YsFctCrMZQ/profile-displayphoto-shrink_800_800/0/1711246000788?e=1720656000&v=beta&t=tQnguUzqoyRoJ6B0dXGu04OF8aPaln0XZEwxz2HL0uY" alt="kasim" className='w-full h-full rounded-full' />
         </div>

@@ -10,7 +10,7 @@ import Cart from "./components/Home/Cart";
 import CategoryList from "./components/Home/CategoryList";
 import InputBoxes from "./components/Home/InputBoxes.jsx";
 
-const server = import.meta.env.BACKEND_URL || "https://pos-api-nd0e.onrender.com/";
+const server = import.meta.env.BACKEND_URL || "http://localhost:3000/";
 
 const App = () => {
   const [tables, setTables] = useState([]);
@@ -209,6 +209,68 @@ const App = () => {
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
   };
+
+  
+  const [subTotal, setSubTotal] = useState(0)
+  const [total, setTotal] = useState(subTotal + (0.05 * subTotal))
+  const [tax, setTax] = useState(0.05 * subTotal)
+
+  const subTotalAmount = cartItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+  useEffect(() => {
+    setSubTotal(subTotalAmount)
+    setTax(0.05 * subTotalAmount)
+    setTotal(subTotalAmount + (0.05 * subTotalAmount))
+  })
+
+  const handleKOTBtn = async () => {
+    try {
+        const data = {
+          table_no: selectedTable.table_no,
+          location_name: selectedTable.location_name
+        }
+        const response = await axios.post(`${server}api/v1/kotstatus`, data);
+        if (response.data.success) {
+          toast.success("KOT Printed");
+          const cartItems = await axios.post(`${server}api/v1/cartitem`, {
+            tableNo: selectedTable.table_no,
+            locationName: selectedTable.location_name,
+          })
+          setCartItems(cartItems.data);
+        }
+    } catch (error) {
+      console.error("Error generating KOT:", error.message);
+    }
+  }
+
+  const handlePrintBillBtn = async () => {
+    try {
+          const billData = {
+          table_no: selectedTable.table_no,
+          location_name: selectedTable.location_name,
+          itemDetails: cartItems,
+          final_amount : total,
+          cgst_tax: 5,
+          sgst_tax: 5,
+          discount_reason: 'No Discount',
+          discount_perc: 0
+        }
+
+        const response = await axios.post(`${server}api/v1/createbill`, billData);
+        if (response.data.success) {
+          toast.success("Bill Generated");
+          const cartItems = await axios.post(`${server}api/v1/cartitem`, {
+            tableNo: selectedTable.table_no,
+            locationName: selectedTable.location_name,
+          })
+          setCartItems(cartItems.data);
+        }
+    } catch (error) {
+      console.error("Error generating Bill:", error.message);
+    }
+  }
   return (
     <>
       <Header isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} toggleCart={toggleCart}/>
@@ -245,10 +307,10 @@ const App = () => {
           />
 
           <div className="hidden fixed  bottom-0 w-full max-md:flex gap-2 px-3 py-0">
-            <button className="w-full rounded-lg bg-text-primary text-xl font-bold text-white px-3 py-2">
+          <button className="w-full rounded-lg bg-text-primary text-lg text-white px-3 py-1" onClick={handlePrintBillBtn}>
               Print
             </button>
-            <button className="w-full rounded-lg bg-text-primary text-xl font-bold text-white px-3 py-2">
+            <button className="w-full rounded-lg bg-text-primary text-lg text-white px-3 py-1" onClick={handleKOTBtn}>
               KOT
             </button>
           </div>
@@ -263,6 +325,11 @@ const App = () => {
           handleAddToCart={handleAddToCart}
           handleDecrementFromCart={handleDecrementFromCart}
           isCartOpen={isCartOpen}
+          handleKOTBtn={handleKOTBtn}
+          handlePrintBillBtn={handlePrintBillBtn}
+          subTotal={subTotal}
+          total={total}
+          tax={tax}
         />
       </main>
       <Toaster position="top-center" />
