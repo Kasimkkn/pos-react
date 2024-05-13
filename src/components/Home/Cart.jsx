@@ -45,7 +45,7 @@ const Cart = ({cartItems , handleTableChange, tableData, selectedTable , handleA
           <div className="my-3 cartItems max-h-80 flex flex-col gap-3 overflow-y-scroll bg-light-primary p-2 rounded-md">
             {cartItems.map((item) => (
               <div key={item._id} className={`flex justify-between hover:cursor-pointer ${item.is_printed ? "bg-text-primary" : "bg-secondary"} p-2 rounded-md`} >
-                <img src={defaultImage} alt={item.item_name} className="w-16 h-16 rounded-md"
+                <img src={defaultImage} alt={item.item_name} className="w-16 h-16 rounded-md" 
                 />
                 <div className="flex justify-center h-full flex-col gap-2 px-3">
                   <p className="text-white text-xs capitalize font-semibold">
