@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaHome, FaHistory, FaBell } from "react-icons/fa";
+import { FaHome, FaHistory } from "react-icons/fa";
 import { BiSolidFoodMenu } from "react-icons/bi";
 import { MdMenu } from 'react-icons/md';
 import { FaCartShopping } from "react-icons/fa6";
@@ -19,15 +19,15 @@ const Header = ({isSidebarOpen , toggleSidebar , toggleCart}) => {
       </div>
       <ul className={`flex gap-10 items-center ${isSidebarOpen ? 'flex flex-col justify-evenly h-96 items-start' : 'max-md:hidden'}`}>
         <li>
-          <a href="#" className='text-text-primary flex gap-2 items-center max-md:text-xl' >
-            <FaHome className='text-2xl' />
-            HOME
+          <a href="#" className='text-text-primary flex gap-2 items-center max-md:text-xl'>
+            <BiSolidFoodMenu className='text-2xl' />
+            MENU
           </a>
         </li>
         <li>
-          <a href="#" className='text-white flex gap-2 items-center max-md:text-xl'>
-            <BiSolidFoodMenu className='text-2xl' />
-            MENU
+          <a href="#" className='text-white flex gap-2 items-center max-md:text-xl' >
+            <FaHome className='text-2xl' />
+            HOME
           </a>
         </li>
         <li>

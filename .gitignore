@@ -12,7 +12,7 @@ dist
 dist-ssr
 src/data
 .env
-
+dummmy.json
 *.local
 
 
